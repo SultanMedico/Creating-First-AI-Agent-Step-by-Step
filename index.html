@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple AI Agent</title>
+    <style>
+        #chat-container {
+            width: 500px;
+            margin: 0 auto;
+            font-family: Arial, sans-serif;
+        }
+        #chat-display {
+            height: 300px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        #user-input {
+            width: 80%;
+            padding: 8px;
+        }
+        #send-button {
+            width: 18%;
+            padding: 8px;
+        }
+        .user-message {
+            color: blue;
+            margin: 5px 0;
+        }
+        .agent-message {
+            color: green;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <h1>Simple AI Agent</h1>
+        <div id="chat-display"></div>
+        <input type="text" id="user-input" placeholder="Type your message...">
+        <button id="send-button">Send</button>
+    </div>
+
+    <script>
+        const chatDisplay = document.getElementById('chat-display');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        
+        // Add initial message
+        addMessage("Agent", "Hello! I'm your simple AI agent. How can I help you?");
+        
+        function addMessage(sender, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = sender.toLowerCase() + '-message';
+            messageDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+            chatDisplay.appendChild(messageDiv);
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        }
+        
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage("You", message);
+                userInput.value = '';
+                
+                // Get agent response
+                fetch('/get_response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `message=${encodeURIComponent(message)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    addMessage("Agent", data.response);
+                });
+            }
+        }
+        
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
